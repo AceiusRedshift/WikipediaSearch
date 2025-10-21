@@ -11,4 +11,6 @@ public class Article
 
     [XmlElement("text")]
     public string Text { get; set; }
+    
+    
 }
