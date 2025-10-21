@@ -4,5 +4,6 @@ namespace Indexer;
 [XmlRoot("xml")]
 public class Corpus
 {
-    [XmlElement("page")] public Article[] Articles { get; set; } = [];
+    [XmlElement("page")] 
+    public Article[] Articles { get; set; } = [];
 }

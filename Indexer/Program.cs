@@ -1,11 +1,8 @@
 ﻿using Indexer;
 
-var fileStream = File.OpenRead("SmallWiki.xml");
-StreamReader reader = new(fileStream);
-
-var articles = Parser.Parse(reader);
+var articles = Parser.ParseFile("SmallWiki.xml");
 
 foreach (Article article in articles)
 {
-    Console.WriteLine(article.Title);
+    Console.WriteLine("#" + article.Title.Trim());
 }

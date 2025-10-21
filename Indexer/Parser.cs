@@ -3,13 +3,14 @@ namespace Indexer;
 
 public class Parser
 {
-    public static Article[] Parse(StreamReader reader)
+    public static Article[] ParseFile(string path)
     {
         XmlSerializer serializer = new(typeof(Corpus));
-        reader.ReadToEnd();
-        Article[] articles = serializer.Deserialize(reader) as Article[];
-        reader.Close();
+        StreamReader reader = new(path);
         
-        return articles ?? throw new Exception();
+        Corpus corpus = serializer.Deserialize(reader) as Corpus;
+        reader.Close();
+
+        return corpus?.Articles ?? throw new Exception();
     }
 }
