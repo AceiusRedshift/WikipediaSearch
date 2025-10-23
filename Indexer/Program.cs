@@ -7,13 +7,13 @@ internal partial class Program
 {
     [GeneratedRegex("\"\\[\\[[^\\[]+?\\]\\]|[^\\W_]+’[^\\W_]+|[^\\W_]+\"")]
     private static partial Regex GeneratedTokenMatchingRegexPattern();
-    
+
     static string SanitizedMatch(Match match) => match.Value.ToLower().Trim('"');
 
     static List<string[]> AllTerms(Article[] articles)
     {
-        List<string[]> allTerms = [];  
-    
+        List<string[]> allTerms = [];
+
         foreach (Article article in articles)
         {
             Regex tokenMatchingPattern = GeneratedTokenMatchingRegexPattern();
@@ -24,13 +24,13 @@ internal partial class Program
                 .Where(StopWords.IsNotStopWord)
                 .Select(word => PorterStemmer.StemOneWord(word, new PorterStemmerImpl()))
                 .ToArray();
-    
+
             allTerms.Add(terms);
         }
 
         return allTerms;
     }
-    
+
     public static void Main(string[] args)
     {
         Console.WriteLine("Starting Indexer");
@@ -39,17 +39,25 @@ internal partial class Program
         var articles = Parser.ParseFile("SmallWiki.xml");
         timer.Report("Corpus Parsed");
 
-        List<string[]> allTerms = AllTerms(articles);  
+        List<IndexInfo> index = articles.Select(article => new IndexInfo(article, [],[])).ToList();
+
+        List<string[]> allTerms = AllTerms(articles);
+        index.ForEach(article => article = article with
+        {
+            Terms = allTerms[article.Article.Id]
+        });
         timer.Report("Terms Tokenized & Stemmed");
 
         Dictionary<string, int> termOccurrence = TermOccurrence(allTerms);
         timer.Report("Term Occurrence Counted");
+        
+        
     }
 
     private static Dictionary<string, int> TermOccurrence(List<string[]> allTerms)
     {
         Dictionary<string, int> termOccurrences = [];
-        
+
         foreach (string[] termSet in allTerms)
         {
             foreach (string term in termSet)
@@ -61,3 +69,5 @@ internal partial class Program
         return termOccurrences;
     }
 }
+
+internal record IndexInfo(Article Article, string[] Terms, int[] Vec);
