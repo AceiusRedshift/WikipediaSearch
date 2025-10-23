@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Text.RegularExpressions;
-using Indexer;
+
+namespace Indexer;
 
 internal partial class Program
 {
@@ -25,8 +26,6 @@ internal partial class Program
                 .ToArray();
     
             allTerms.Add(terms);
-    
-            // Console.WriteLine($"{article.Title.Trim()} (ID {article.Id}): {string.Join(',', terms)}");
         }
 
         return allTerms;
@@ -34,6 +33,7 @@ internal partial class Program
     
     public static void Main(string[] args)
     {
+        Console.WriteLine("Starting Indexer");
         Stopwatch timer = Stopwatch.StartNew();
 
         var articles = Parser.ParseFile("SmallWiki.xml");
@@ -41,5 +41,23 @@ internal partial class Program
 
         List<string[]> allTerms = AllTerms(articles);  
         timer.Report("Terms Tokenized & Stemmed");
+
+        Dictionary<string, int> termOccurrence = TermOccurrence(allTerms);
+        timer.Report("Term Occurrence Counted");
+    }
+
+    private static Dictionary<string, int> TermOccurrence(List<string[]> allTerms)
+    {
+        Dictionary<string, int> termOccurrences = [];
+        
+        foreach (string[] termSet in allTerms)
+        {
+            foreach (string term in termSet)
+            {
+                termOccurrences[term] = termOccurrences.TryGetValue(term, out int value) ? value + 1 : 1;
+            }
+        }
+
+        return termOccurrences;
     }
 }
