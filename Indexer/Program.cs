@@ -52,7 +52,7 @@ internal class Program
         CorpusIndex index = new()
         {
             Terms = corpus,
-            Documents = articles.Select(article => new CorpusIndexEntry(article.Id, article.Title, documentVectors[article.Id])).ToArray()
+            Documents = articles.Select(article => new CorpusIndexEntry(article.Id, article.Title.Trim(), documentVectors[article.Id])).ToArray()
         };
 
         index.ToFile(Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "index.json"));

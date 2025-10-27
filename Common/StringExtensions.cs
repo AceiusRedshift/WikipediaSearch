@@ -1,3 +1,4 @@
+using System.Diagnostics.Contracts;
 using System.Text.RegularExpressions;
 using Indexer;
 namespace Common;
@@ -9,6 +10,7 @@ public static partial class StringExtensions
 
     static string SanitizedMatch(Match match) => match.Value.ToLower().Trim('"');
     
+    [Pure]
     public static List<string> ExtractTerms(this string input) => GeneratedTokenMatchingRegexPattern()
         .Matches(input)
         .Select(SanitizedMatch)

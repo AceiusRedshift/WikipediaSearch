@@ -1,6 +1,4 @@
-﻿bool keepRunning = true;
-
-while (keepRunning)
+﻿while (true)
 {
     Console.Write("> ");
     string input = Console.ReadLine() ?? string.Empty;
@@ -9,7 +7,6 @@ while (keepRunning)
     {
         if (input == "/quit")
         {
-            keepRunning = false;
             return;
         }
 
