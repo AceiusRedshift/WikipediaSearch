@@ -10,26 +10,12 @@ internal partial class Program
 
     static string SanitizedMatch(Match match) => match.Value.ToLower().Trim('"');
 
-    static List<string[]> AllTerms(Article[] articles)
-    {
-        List<string[]> allTerms = [];
-
-        foreach (Article article in articles)
-        {
-            Regex tokenMatchingPattern = GeneratedTokenMatchingRegexPattern();
-
-            string[] terms = tokenMatchingPattern
-                .Matches(article.Text)
-                .Select(SanitizedMatch)
-                .Where(StopWords.IsNotStopWord)
-                .Select(word => PorterStemmer.StemOneWord(word, new PorterStemmerImpl()))
-                .ToArray();
-
-            allTerms.Add(terms);
-        }
-
-        return allTerms;
-    }
+    static List<string> GetAllTerms(Article article) => GeneratedTokenMatchingRegexPattern()
+        .Matches(article.Text)
+        .Select(SanitizedMatch)
+        .Where(StopWords.IsNotStopWord)
+        .Select(word => PorterStemmer.StemOneWord(word, new PorterStemmerImpl()))
+        .ToList();
 
     public static void Main(string[] args)
     {
@@ -39,35 +25,29 @@ internal partial class Program
         var articles = Parser.ParseFile("SmallWiki.xml");
         timer.Report("Corpus Parsed");
 
-        List<IndexInfo> index = articles.Select(article => new IndexInfo(article, [],[])).ToList();
-
-        List<string[]> allTerms = AllTerms(articles);
-        index.ForEach(article => article = article with
-        {
-            Terms = allTerms[article.Article.Id]
-        });
+        List<string> allTerms = articles.Select(GetAllTerms).SelectMany(i => i).Distinct().ToList();
         timer.Report("Terms Tokenized & Stemmed");
 
+        foreach (Article article in articles)
+        {
+            var l = TermOccurrence(GetAllTerms(article));
+        }
+        
         Dictionary<string, int> termOccurrence = TermOccurrence(allTerms);
         timer.Report("Term Occurrence Counted");
         
         
     }
 
-    private static Dictionary<string, int> TermOccurrence(List<string[]> allTerms)
+    private static Dictionary<string, int> TermOccurrence(List<string> terms)
     {
         Dictionary<string, int> termOccurrences = [];
 
-        foreach (string[] termSet in allTerms)
+        foreach (string term in terms)
         {
-            foreach (string term in termSet)
-            {
-                termOccurrences[term] = termOccurrences.TryGetValue(term, out int value) ? value + 1 : 1;
-            }
+            termOccurrences[term] = termOccurrences.TryGetValue(term, out int value) ? value + 1 : 1;
         }
 
         return termOccurrences;
     }
 }
-
-internal record IndexInfo(Article Article, string[] Terms, int[] Vec);
