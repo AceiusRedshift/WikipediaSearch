@@ -5,7 +5,7 @@ static class StopwatchExtensions
 {
     public static void Report(this Stopwatch timer, string text)
     {
-        Console.WriteLine($"{text} in {timer.Elapsed}");
+        Console.WriteLine($"{text} in {timer.Elapsed:g}");
         timer.Restart();
     }
 }

@@ -49,15 +49,15 @@ internal class Program
 
         timer.Report("Document Vectors Created");
 
-        CorpusIndex index = new CorpusIndex()
+        CorpusIndex index = new()
         {
             Terms = corpus,
-            Documents = documentVectors.ToList()
+            Documents = articles.Select(article => new CorpusIndexEntry(article.Id, article.Title, documentVectors[article.Id])).ToArray()
         };
 
         index.ToFile(Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "index.json"));
         timer.Report("Index File Written");
 
-        Console.WriteLine($"Done in {fullTimer.Elapsed}");
+        Console.WriteLine($"Done In {fullTimer.Elapsed:g}");
     }
 }
