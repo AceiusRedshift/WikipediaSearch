@@ -1,23 +1,10 @@
 ﻿using System.Diagnostics;
-using System.Text.RegularExpressions;
 using Common;
 
 namespace Indexer;
 
-internal partial class Program
+internal class Program
 {
-    [GeneratedRegex("\"\\[\\[[^\\[]+?\\]\\]|[^\\W_]+’[^\\W_]+|[^\\W_]+\"")]
-    private static partial Regex GeneratedTokenMatchingRegexPattern();
-
-    static string SanitizedMatch(Match match) => match.Value.ToLower().Trim('"');
-
-    static List<string> GetAllTerms(Article article) => GeneratedTokenMatchingRegexPattern()
-        .Matches(article.Text)
-        .Select(SanitizedMatch)
-        .Where(StopWords.IsNotStopWord)
-        .Select(word => PorterStemmer.StemOneWord(word, new PorterStemmerImpl()))
-        .ToList();
-
     private static Dictionary<string, int> TermOccurrence(List<string> terms)
     {
         Dictionary<string, int> termOccurrences = [];
@@ -39,7 +26,7 @@ internal partial class Program
         var articles = Parser.ParseFile("SmallWiki.xml");
         timer.Report("Articles Parsed");
 
-        List<string> allTerms = articles.Select(GetAllTerms).SelectMany(i => i).ToList();
+        List<string> allTerms = articles.Select(article => article.Text.ExtractTerms()).SelectMany(i => i).ToList();
         timer.Report("Terms Tokenized & Stemmed");
 
         // All unique terms
@@ -47,7 +34,7 @@ internal partial class Program
         List<int[]> documentVectors = [];
 
         // The following could be a linq statement but whatever
-        foreach (List<string> articleTerms in articles.Select(GetAllTerms))
+        foreach (List<string> articleTerms in articles.Select(article => article.Text.ExtractTerms()))
         {
             List<int> corpusTermCount = [];
             Dictionary<string, int> articleTermCount = TermOccurrence(articleTerms);
@@ -59,7 +46,7 @@ internal partial class Program
 
             documentVectors.Add(corpusTermCount.ToArray());
         }
-        
+
         timer.Report("Document Vectors Created");
 
         CorpusIndex index = new CorpusIndex()
@@ -70,7 +57,7 @@ internal partial class Program
 
         index.ToFile(Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "index.json"));
         timer.Report("Index File Written");
-        
+
         Console.WriteLine($"Done in {fullTimer.Elapsed}");
     }
 }
