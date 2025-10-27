@@ -7,4 +7,6 @@ public class CorpusIndex
     public List<int[]> Documents { get; set; } = [];
 
     public void ToFile(string path) => File.WriteAllText(path, JsonSerializer.Serialize(this));
+    
+    public static CorpusIndex FromFile(string path) => JsonSerializer.Deserialize<CorpusIndex>(File.ReadAllText(path)) ?? throw new InvalidOperationException();
 }
