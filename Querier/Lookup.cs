@@ -10,23 +10,26 @@ public static class Lookup
     public static int[] Terms(string input)
     {
         List<string> inputTerms = input.ExtractTerms().Distinct().ToList();
-        
+        Dictionary<int, List<(string, float, float)>> indexScores = [];
+
         foreach (CorpusIndexEntry entry in Index.Documents)
         {
             // term, tf, idf
             List<(string, float, float)> termData = [];
 
-            foreach (string term in inputTerms)
+            for (int i = 0; i < inputTerms.Count; i++)
             {
-                float termFrequency = 0;
-                float inverseDocumentFrequency = 0;
-            
-                // entry.Vector
+                int termIndex = Array.IndexOf(Index.Terms, inputTerms[i]);
 
-                termData.Add((term, termFrequency, inverseDocumentFrequency));
+                float termFrequency = 0;
+                float inverseDocumentFrequency = MathF.Log(Index.Documents.Length, Index.Documents.Count(doc => doc.Vector[termIndex] != 0));
+
+                termData.Add((Index.Terms[termIndex], termFrequency, inverseDocumentFrequency));
             }
+
+            indexScores.Add(entry.Id, termData);
         }
 
-        return [0];
+        return indexScores.OrderBy(score => score.Value.First().Item3).ToArray().Select(pair => (int)pair.Value.First().Item3).ToArray();
     }
 }
