@@ -1,6 +1,4 @@
-namespace Indexer;
-
-// C# port of provided scala code
+namespace Common;
 
 public static class StopWords
 {

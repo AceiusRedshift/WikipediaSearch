@@ -5,7 +5,7 @@
 
     if (!string.IsNullOrWhiteSpace(input))
     {
-        if (input == "/quit")
+        if (input == ":quit")
         {
             return;
         }
