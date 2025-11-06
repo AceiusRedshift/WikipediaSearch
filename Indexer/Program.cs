@@ -1,13 +1,12 @@
-﻿using System.Text.Json;
-using System.Text.RegularExpressions;
-using Common;
+﻿using Common;
 using Indexer.Document;
 
 // The total number of times tf the term appears in the corpus.
-Dictionary<string, int> termFrequency = [];
+Dictionary<int, Dictionary<string, int>> termFrequency = [];
 // The total number of documents n the term appears in.
 Dictionary<string, int> termOccurrence = [];
 Dictionary<string, double> inverseDocumentFrequency = [];
+Dictionary<int, string> titles = [];
 
 Article[] wiki = Parser.ParseFile("SmallWiki.xml");
 
@@ -17,16 +16,19 @@ foreach (Article article in wiki)
     string title = article.Title.Trim();
     string[] terms = article.Text.ToTerms();
 
+    termFrequency[id] = [];
+    titles[id] = title;
+
     // if link
 
     foreach (string term in terms)
     {
-        if (!termFrequency.TryAdd(term, 1))
+        if (!termFrequency[id].TryAdd(term, 1))
         {
-            termFrequency[term]++;
+            termFrequency[id][term]++;
         }
     }
-    
+
     foreach (string distinctTerm in terms.Distinct())
     {
         if (!termOccurrence.TryAdd(distinctTerm, 1))
@@ -36,13 +38,13 @@ foreach (Article article in wiki)
     }
 }
 
-IEnumerable<string> allTerms = termFrequency.Keys; // If the term appears at least once it will be in the term frequency dictionary, so instead of parsing the corpus again we re-use this.
+IEnumerable<string> allTerms = termOccurrence.Keys;// If the term appears at least once it will be in the occurrence dictionary, so instead of parsing the corpus again we re-use this.
 int articleCount = wiki.Length;
 
 foreach (string term in allTerms)
 {
-    inverseDocumentFrequency[term] = Math.Log(articleCount, termOccurrence[term]);
+    inverseDocumentFrequency[term] = Math.Log((float)articleCount / termOccurrence[term]);
 }
 
-Console.Write(
-    JsonSerializer.Serialize(termFrequency));
+IndexFile index = new(titles, termFrequency, termOccurrence, inverseDocumentFrequency);
+index.Save();
