@@ -1,4 +1,5 @@
-﻿using Common;
+﻿using System.Diagnostics;
+using Common;
 using Indexer.Document;
 
 // The total number of times tf the term appears in the corpus.
@@ -8,7 +9,11 @@ Dictionary<string, int> termOccurrence = [];
 Dictionary<string, double> inverseDocumentFrequency = [];
 Dictionary<int, string> titles = [];
 
-Article[] wiki = Parser.ParseFile("SmallWiki.xml");
+string path = args.ElementAtOrDefault(0) ?? "SmallWiki.xml";
+Stopwatch timer = Stopwatch.StartNew();
+
+Console.WriteLine($"Parsing {path}");
+Article[] wiki = Parser.ParseFile(path);
 
 foreach (Article article in wiki)
 {
@@ -48,3 +53,5 @@ foreach (string term in allTerms)
 
 IndexFile index = new(titles, termFrequency, termOccurrence, inverseDocumentFrequency);
 index.Save();
+
+Console.WriteLine($"Done in {timer.Elapsed:g}");
