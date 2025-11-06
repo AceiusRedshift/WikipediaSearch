@@ -14,7 +14,7 @@ while (true)
             return;
         }
 
-        foreach (string result in index.Query(input.ToTerms()))
+        foreach (string result in index.Query(input.ToTerms()).Take(10))
         {
             Console.WriteLine(result);
         }

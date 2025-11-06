@@ -11,8 +11,8 @@ public record IndexFile(Dictionary<int, string> Titles, Dictionary<int, Dictiona
 
     public void Save() => File.WriteAllText(Path, JsonSerializer.Serialize(this));
 
-    public string[] Query(string[] terms)
-    {
-        return [];
-    }
+    public string[] Query(string[] terms) => Titles.Keys
+        .OrderBy(j => terms.Sum(term => -(TermFrequency[j].GetValueOrDefault(term, 0) * InverseDocumentFrequency.GetValueOrDefault(term, 999.0))))
+        .Select(id => Titles[id])
+        .ToArray();
 }
