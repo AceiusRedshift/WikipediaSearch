@@ -1,4 +1,8 @@
-﻿while (true)
+﻿using Common;
+
+IndexFile index = IndexFile.Load();
+
+while (true)
 {
     Console.Write("> ");
     string input = Console.ReadLine() ?? string.Empty;
@@ -10,9 +14,9 @@
             return;
         }
 
-        foreach (int i in Querier.Lookup.Terms(input))
+        foreach (string result in index.Query(input.ToTerms()))
         {
-            Console.Write(i);
+            Console.WriteLine(result);
         }
     }
 }
