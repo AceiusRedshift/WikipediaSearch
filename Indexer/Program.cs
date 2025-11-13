@@ -15,6 +15,8 @@ Stopwatch timer = Stopwatch.StartNew();
 Console.WriteLine($"Parsing {path}");
 Article[] wiki = Parser.ParseFile(path);
 
+int i = 0;
+float j = wiki.Length;
 foreach (Article article in wiki)
 {
     int id = article.Id;
@@ -41,6 +43,10 @@ foreach (Article article in wiki)
             termOccurrence[distinctTerm]++;
         }
     }
+
+    DrawProgress(i / j);
+
+    i++;
 }
 
 IEnumerable<string> allTerms = termOccurrence.Keys;// If the term appears at least once it will be in the occurrence dictionary, so instead of parsing the corpus again we re-use this.
@@ -55,3 +61,23 @@ IndexFile index = new(titles, termFrequency, termOccurrence, inverseDocumentFreq
 index.Save();
 
 Console.WriteLine($"Done in {timer.Elapsed:g}");
+
+return;
+
+void DrawProgress(float progress)
+{
+    string dial = $" [{(progress * 100):000.000}%]";
+
+    int width = Console.BufferWidth - dial.Length;
+    int barWidth = (int)(width * progress);
+    for (int k = 0; k < barWidth; k++)
+    {
+        Console.Write('.');
+    }
+    for (int k = 0; k < (width - barWidth); k++)
+    {
+        Console.Write(' ');
+    }
+
+    Console.WriteLine(dial);
+}
